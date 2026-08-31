@@ -118,20 +118,27 @@ export function createAuthHandle(policy: AuthPolicy = {}): Handle {
 		const path = event.url.pathname;
 		const isApi = underAny(path, apiPaths);
 
-		if (!locals(event).user) {
+		if (!locals(event).user && !anonymousAllowed(policy, event) && !underAny(path, publicPaths)) {
 			/**
-			 * API paths answer 401 whatever the policy says. An unauthenticated
-			 * API call is a failed call even on an app that anonymous visitors
-			 * may browse; it is the page routes that the policy governs.
+			 * When the policy denies anonymous access, API paths answer 401
+			 * rather than redirecting: a fetch() follows a 303 and resolves 200
+			 * with an HTML body, so the caller would parse a login page as data.
+			 *
+			 * This is tied to the policy on purpose. On an app that anonymous
+			 * visitors MAY browse, the listing endpoints legitimately serve them
+			 * filtered results, and a blanket 401 here would break the very
+			 * pages the policy is allowing. Those endpoints enforce their own
+			 * rules from locals.user, which is the only place that knows what a
+			 * guest is allowed to see.
 			 */
-			if (isApi && !underAny(path, publicPaths)) {
+			if (isApi) {
 				return new Response(JSON.stringify({ error: 'unauthenticated' }), {
 					status: 401,
 					headers: { 'content-type': 'application/json', 'cache-control': 'no-store' }
 				});
 			}
 
-			if (!anonymousAllowed(policy, event) && !underAny(path, publicPaths)) {
+			{
 				const target = policy.unauthenticatedRedirect ?? 'login';
 				if (target === 'login') {
 					const returnTo = encodeURIComponent(path + event.url.search);
