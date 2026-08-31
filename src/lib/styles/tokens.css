@@ -1,0 +1,153 @@
+/**
+ * Netframe design tokens - the single source of truth for colour.
+ *
+ * Every Netframe app imports this file. Nothing else should define an --nf-*
+ * value, and no component should contain a raw hex.
+ *
+ * Three theme states:
+ *   nothing recorded  -> follow the OS
+ *   explicit "light"  -> stay light even on a dark OS
+ *   explicit "dark"   -> dark even on a light OS
+ *
+ * The choice travels between apps in an `nf-theme` cookie scoped to
+ * .netframe.com, and is stamped onto <html> as data-nf-theme by each app's
+ * pre-paint bootstrap before any markup renders.
+ *
+ * Consuming apps must ALSO register these names with Tailwind, or the
+ * bg-nf-* / text-nf-* utilities will not be generated:
+ *   Tailwind v3 -> theme.extend.colors in tailwind.config.js
+ *   Tailwind v4 -> an `@theme inline` block (inline matters: the values are
+ *                  runtime variables and would otherwise be frozen at build)
+ * and must scan this package for classes (v3 `content`, v4 `@source`),
+ * otherwise the shared components render unstyled with no error.
+ */
+
+:root {
+	/* Surfaces */
+	--nf-bg: #ffffff;
+	--nf-surface-alt: #f5f7fa;
+	--nf-surface-sunken: #eef1f6;
+	--nf-card: #ffffff;
+	--nf-card-hover: #f8fafc;
+	--nf-header: #f3f5f9;
+	--nf-overlay: rgba(15, 23, 42, 0.55);
+
+	/* Borders */
+	--nf-border: #e2e8f0;
+	--nf-border-soft: rgba(226, 232, 240, 0.6);
+	--nf-border-strong: #cbd5e1;
+
+	/* Text */
+	--nf-text: #0f172a;
+	--nf-text-strong: #020617;
+	--nf-muted-strong: #334155;
+	--nf-muted: #64748b;
+	--nf-subtle: #94a3b8;
+	--nf-faint: #cbd5e1;
+	--nf-on-brand: #ffffff;
+
+	/* Brand */
+	--nf-brand: #2563eb;
+	--nf-brand-hover: #1d4ed8;
+	--nf-brand-text: #1d4ed8;
+	--nf-brand-soft-bg: #eff6ff;
+	--nf-brand-soft-border: #dbeafe;
+
+	/* Status */
+	--nf-success-bg: #f0fdf4;
+	--nf-success-border: #bbf7d0;
+	--nf-success-text: #15803d;
+	--nf-warning-bg: #fffbeb;
+	--nf-warning-border: #fde68a;
+	--nf-warning-text: #b45309;
+	--nf-danger-bg: #fef2f2;
+	--nf-danger-border: #fecaca;
+	--nf-danger-text: #b91c1c;
+
+	/* Hero: intentionally dark in both themes */
+	--nf-hero-bg: #0b0f19;
+
+	--nf-focus-ring: rgba(37, 99, 235, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-nf-theme='light']) {
+		--nf-bg: #13161f;
+		--nf-surface-alt: #181d28;
+		--nf-surface-sunken: #0f1320;
+		--nf-card: #1c2230;
+		--nf-card-hover: #232a3a;
+		--nf-header: #191e2a;
+		--nf-overlay: rgba(0, 0, 0, 0.6);
+
+		--nf-border: #2a3245;
+		--nf-border-soft: rgba(42, 50, 69, 0.55);
+		--nf-border-strong: #3b4660;
+
+		--nf-text: #e5e7eb;
+		--nf-text-strong: #f8fafc;
+		--nf-muted-strong: #cbd5e1;
+		--nf-muted: #94a3b8;
+		--nf-subtle: #64748b;
+		--nf-faint: #475569;
+		--nf-on-brand: #ffffff;
+
+		--nf-brand: #60a5fa;
+		--nf-brand-hover: #93c5fd;
+		--nf-brand-text: #93c5fd;
+		--nf-brand-soft-bg: rgba(37, 99, 235, 0.18);
+		--nf-brand-soft-border: rgba(96, 165, 250, 0.32);
+
+		--nf-success-bg: rgba(34, 197, 94, 0.12);
+		--nf-success-border: rgba(34, 197, 94, 0.32);
+		--nf-success-text: #4ade80;
+		--nf-warning-bg: rgba(245, 158, 11, 0.12);
+		--nf-warning-border: rgba(245, 158, 11, 0.32);
+		--nf-warning-text: #fbbf24;
+		--nf-danger-bg: rgba(239, 68, 68, 0.12);
+		--nf-danger-border: rgba(239, 68, 68, 0.32);
+		--nf-danger-text: #f87171;
+
+		--nf-focus-ring: rgba(96, 165, 250, 0.5);
+	}
+}
+
+:root[data-nf-theme='dark'] {
+	--nf-bg: #13161f;
+	--nf-surface-alt: #181d28;
+	--nf-surface-sunken: #0f1320;
+	--nf-card: #1c2230;
+	--nf-card-hover: #232a3a;
+	--nf-header: #191e2a;
+	--nf-overlay: rgba(0, 0, 0, 0.6);
+
+	--nf-border: #2a3245;
+	--nf-border-soft: rgba(42, 50, 69, 0.55);
+	--nf-border-strong: #3b4660;
+
+	--nf-text: #e5e7eb;
+	--nf-text-strong: #f8fafc;
+	--nf-muted-strong: #cbd5e1;
+	--nf-muted: #94a3b8;
+	--nf-subtle: #64748b;
+	--nf-faint: #475569;
+	--nf-on-brand: #ffffff;
+
+	--nf-brand: #60a5fa;
+	--nf-brand-hover: #93c5fd;
+	--nf-brand-text: #93c5fd;
+	--nf-brand-soft-bg: rgba(37, 99, 235, 0.18);
+	--nf-brand-soft-border: rgba(96, 165, 250, 0.32);
+
+	--nf-success-bg: rgba(34, 197, 94, 0.12);
+	--nf-success-border: rgba(34, 197, 94, 0.32);
+	--nf-success-text: #4ade80;
+	--nf-warning-bg: rgba(245, 158, 11, 0.12);
+	--nf-warning-border: rgba(245, 158, 11, 0.32);
+	--nf-warning-text: #fbbf24;
+	--nf-danger-bg: rgba(239, 68, 68, 0.12);
+	--nf-danger-border: rgba(239, 68, 68, 0.32);
+	--nf-danger-text: #f87171;
+
+	--nf-focus-ring: rgba(96, 165, 250, 0.5);
+}
