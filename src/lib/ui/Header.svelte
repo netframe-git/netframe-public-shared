@@ -165,7 +165,14 @@
 				{/if}
 
 				{#if sectionLabel}
-					<span class="text-sm font-medium tracking-tight text-nf-muted">{sectionLabel}</span>
+					<!--
+						Sits left of the divider and reads as the name of the app you
+						are in, so it carries real weight rather than being a caption.
+						pr-2 buys it a little room away from the rule.
+					-->
+					<span class="pr-2 text-base font-semibold tracking-tight text-nf-text">
+						{sectionLabel}
+					</span>
 					<span class="h-6 w-px bg-nf-border" aria-hidden="true"></span>
 				{/if}
 
