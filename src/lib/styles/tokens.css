@@ -151,3 +151,18 @@
 
 	--nf-focus-ring: rgba(96, 165, 250, 0.5);
 }
+
+/**
+ * Dropdown entrance used by the shared Header. Lives here rather than in a
+ * component so it is defined once, wherever the tokens are imported.
+ */
+@keyframes nfMegaIn {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

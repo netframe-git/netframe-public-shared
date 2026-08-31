@@ -1,10 +1,20 @@
 /**
  * Shared chrome for the Netframe apps.
  *
- * Components take their content as props rather than importing it. That is
- * deliberate: the public site has regions, a mega menu and a cookie banner,
- * and the portals have none of those. Anything app-specific is injected by the
- * app, so one component serves all of them.
+ * Components take their content as props rather than importing it. The public
+ * site has regions, a mega menu and a cookie banner; the portals have none of
+ * those. Anything app-specific is injected, so one component serves them all.
  */
 export { default as Logo } from './Logo.svelte';
-export type { NavItem, NavSection, FooterColumn, FooterLink } from './types.js';
+export { default as Header } from './Header.svelte';
+export { default as Footer } from './Footer.svelte';
+export type {
+	SessionUser,
+	FooterLink,
+	FooterColumn,
+	SocialLinks,
+	RegionSwitcher,
+	NavEntry,
+	NavSection,
+	NavItem
+} from './types.js';

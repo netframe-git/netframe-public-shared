@@ -1,6 +1,6 @@
 {
 	"name": "@netframe/shared",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Shared chrome, design tokens and auth for the Netframe apps.",
 	"license": "UNLICENSED",
 	"private": false,
@@ -12,16 +12,20 @@
 		"**/*.css"
 	],
 	"exports": {
+		"./styles/tokens.css": "./dist/styles/tokens.css",
+		"./theme": {
+			"types": "./dist/theme/index.d.ts",
+			"default": "./dist/theme/index.js"
+		},
 		"./ui": {
 			"types": "./dist/ui/index.d.ts",
 			"svelte": "./dist/ui/index.js"
-		},
-		"./styles/tokens.css": "./dist/styles/tokens.css"
+		}
 	},
 	"scripts": {
 		"build": "svelte-package",
 		"prepare": "svelte-package",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+		"check": "svelte-check --tsconfig ./tsconfig.json"
 	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
