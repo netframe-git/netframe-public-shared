@@ -20,7 +20,7 @@
 	},
 	"scripts": {
 		"build": "svelte-package",
-		"prepublishOnly": "npm run build",
+		"prepare": "svelte-package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
 	},
 	"peerDependencies": {
