@@ -1,6 +1,6 @@
 {
 	"name": "@netframe/shared",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Shared chrome, design tokens and auth for the Netframe apps.",
 	"license": "UNLICENSED",
 	"private": false,

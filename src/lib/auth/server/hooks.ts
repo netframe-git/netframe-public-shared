@@ -41,6 +41,22 @@ export interface AuthPolicy {
 	 * in six apps that each have to remember it.
 	 */
 	publicPaths?: string[];
+
+	/**
+	 * Path prefixes that answer 401 JSON instead of redirecting.
+	 *
+	 * Redirecting an API call to a login page is a bug: a fetch() follows the
+	 * redirect and resolves with 200 and an HTML body, so the caller sees
+	 * success and parses a login page as data. Anything under these prefixes
+	 * gets a status code instead.
+	 */
+	apiPaths?: string[];
+
+	/**
+	 * Send `cache-control: no-store` on API responses. Session-dependent
+	 * responses must not be cached by a browser or an intermediary.
+	 */
+	noStoreApiResponses?: boolean;
 }
 
 /**
@@ -79,6 +95,11 @@ function anonymousAllowed(policy: AuthPolicy, event: RequestEvent): boolean {
 export function createAuthHandle(policy: AuthPolicy = {}): Handle {
 	const publicPaths = [...ALWAYS_PUBLIC, ...(policy.publicPaths ?? [])];
 
+	const apiPaths = policy.apiPaths ?? ['/api'];
+	const noStore = policy.noStoreApiResponses ?? true;
+	const underAny = (path: string, prefixes: string[]) =>
+		prefixes.some((p) => path === p || path.startsWith(p + '/'));
+
 	return async ({ event, resolve }) => {
 		/**
 		 * A failure to resolve the session must not 500 the app. An expired or
@@ -94,19 +115,34 @@ export function createAuthHandle(policy: AuthPolicy = {}): Handle {
 			locals(event).user = undefined;
 		}
 
-		if (!locals(event).user && !anonymousAllowed(policy, event)) {
-			const path = event.url.pathname;
-			const exempt = publicPaths.some((p) => path === p || path.startsWith(p + '/'));
-			if (!exempt) {
+		const path = event.url.pathname;
+		const isApi = underAny(path, apiPaths);
+
+		if (!locals(event).user) {
+			/**
+			 * API paths answer 401 whatever the policy says. An unauthenticated
+			 * API call is a failed call even on an app that anonymous visitors
+			 * may browse; it is the page routes that the policy governs.
+			 */
+			if (isApi && !underAny(path, publicPaths)) {
+				return new Response(JSON.stringify({ error: 'unauthenticated' }), {
+					status: 401,
+					headers: { 'content-type': 'application/json', 'cache-control': 'no-store' }
+				});
+			}
+
+			if (!anonymousAllowed(policy, event) && !underAny(path, publicPaths)) {
 				const target = policy.unauthenticatedRedirect ?? 'login';
 				if (target === 'login') {
-					const returnTo = encodeURIComponent(event.url.pathname + event.url.search);
+					const returnTo = encodeURIComponent(path + event.url.search);
 					throw redirect(303, `/auth/start?returnTo=${returnTo}`);
 				}
 				throw redirect(303, target);
 			}
 		}
 
-		return resolve(event);
+		const response = await resolve(event);
+		if (noStore && isApi) response.headers.set('cache-control', 'no-store');
+		return response;
 	};
 }
