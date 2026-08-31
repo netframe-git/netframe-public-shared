@@ -46,7 +46,7 @@
 	);
 </script>
 
-<footer class="border-t border-nf-border-soft bg-nf-bg">
+<footer class="border-t border-nf-border-soft bg-nf-header">
 	<div class="mx-auto w-full max-w-[1280px] px-4 sm:px-6 md:px-10">
 		<div class="pt-14 pb-8">
 			<div class="mb-12 grid grid-cols-2 gap-8 md:grid-cols-6">

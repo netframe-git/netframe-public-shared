@@ -16,8 +16,18 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 const STORAGE_KEY = 'nf-theme';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
-/** Cookies are shared across subdomains of these bases only. */
-const SHARED_BASES = ['netframe.com'];
+/**
+ * Bases whose subdomains share the theme cookie.
+ *
+ * Longest first: the first match wins, and a shorter base must never shadow a
+ * longer one it happens to be a substring of.
+ *
+ * The .neond.dev entry is what lets the dev deployments share a choice with
+ * each other. Without it every dev host sets a host-only cookie and the theme
+ * appears not to carry between apps - which looks exactly like the feature
+ * being broken, while production works fine.
+ */
+const SHARED_BASES = ['netframe.com.neond.dev', 'netframe.com'];
 
 const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
 
