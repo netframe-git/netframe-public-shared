@@ -1,8 +1,22 @@
-/** The signed-in user, as each app's server resolves it from its session. */
+/**
+ * The signed-in user, as resolved from a verified Keycloak access token.
+ *
+ * Lives here rather than beside the auth code because both sides need it: the
+ * server builds it in $lib/server/auth, and components read it off layout
+ * data. A component cannot import from $lib/server at all, so a shared type
+ * module is the only place the two can meet.
+ */
 export interface SessionUser {
-	name?: string;
-	username?: string;
-	email?: string;
+	/** Keycloak subject id. Stable per user. */
+	sub: string;
+	username: string;
+	/**
+	 * Verified email address. This is the load-bearing claim in this portal:
+	 * file and product visibility tiers are matched against it, so a user with
+	 * no email sees public releases only.
+	 */
+	email: string | null;
+	name: string | null;
 }
 
 export interface FooterLink {
