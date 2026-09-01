@@ -35,10 +35,25 @@ export function readCookie(name: string): string | null {
 	return m ? decodeURIComponent(m[1]) : null;
 }
 
-/** Write a cookie scoped as widely as the current host allows. */
+/**
+ * Write a cookie scoped as widely as the current host allows.
+ *
+ * Clears any host-only cookie of the same name first. Changing a cookie's
+ * domain does not replace the old one - the browser keeps both, sends both,
+ * and the more specific host-only value appears first in document.cookie. So
+ * an existing host-only cookie silently shadows the shared one forever, and
+ * the visitor keeps being asked a question they already answered. Anyone who
+ * used the site before this became domain-scoped has exactly that cookie.
+ */
 export function writeSharedCookie(name: string, value: string, maxAgeSeconds: number): void {
 	if (typeof document === 'undefined' || typeof location === 'undefined') return;
-	const domain = cookieDomainAttr(location.hostname);
 	const secure = location.protocol === 'https:' ? '; Secure' : '';
+	const domain = cookieDomainAttr(location.hostname);
+
+	if (domain) {
+		// Expire the host-only copy, if one is left over from before.
+		document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax${secure}`;
+	}
+
 	document.cookie = `${name}=${encodeURIComponent(value)}; path=/${domain}; max-age=${maxAgeSeconds}; SameSite=Lax${secure}`;
 }
