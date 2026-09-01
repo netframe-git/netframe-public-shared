@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { readCookie, writeSharedCookie } from '../internal/cookieDomain.js';
 
 /**
  * Light/dark preference, shared across every Netframe app.
@@ -16,26 +17,8 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 const STORAGE_KEY = 'nf-theme';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
-/**
- * Bases whose subdomains share the theme cookie.
- *
- * Longest first: the first match wins, and a shorter base must never shadow a
- * longer one it happens to be a substring of.
- *
- * The .neond.dev entry is what lets the dev deployments share a choice with
- * each other. Without it every dev host sets a host-only cookie and the theme
- * appears not to carry between apps - which looks exactly like the feature
- * being broken, while production works fine.
- */
-const SHARED_BASES = ['netframe.com.neond.dev', 'netframe.com'];
 
 const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
-
-function readCookie(): string | null {
-	if (!isBrowser()) return null;
-	const m = document.cookie.match(/(?:^|;\s*)nf-theme=([^;]*)/);
-	return m ? decodeURIComponent(m[1]) : null;
-}
 
 function coerce(v: string | null | undefined): ThemeMode {
 	return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
@@ -44,7 +27,7 @@ function coerce(v: string | null | undefined): ThemeMode {
 export function readInitial(): ThemeMode {
 	if (!isBrowser()) return 'system';
 	try {
-		return coerce(readCookie() ?? localStorage.getItem(STORAGE_KEY));
+		return coerce(readCookie(STORAGE_KEY) ?? localStorage.getItem(STORAGE_KEY));
 	} catch {
 		return 'system';
 	}
@@ -63,19 +46,16 @@ export function applyMode(mode: ThemeMode): void {
 }
 
 /**
- * The domain attribute is omitted off netframe.com. A cookie naming a domain
- * the page is not under is silently dropped, which would break the toggle in
- * local development with no error to explain it.
+ * Persisted twice on purpose: localStorage as a same-origin fallback, and a
+ * cookie scoped to the shared parent domain so the choice follows the visitor
+ * to the other Netframe apps. Domain scoping lives in one place for both this
+ * and the consent cookie - see internal/cookieDomain.
  */
-function persist(mode: ThemeMode): void {
+function persist(mode: ThemeMode) {
 	if (!isBrowser()) return;
 	try {
 		localStorage.setItem(STORAGE_KEY, mode);
-		const host = location.hostname;
-		const base = SHARED_BASES.find((d) => host === d || host.endsWith('.' + d));
-		const domain = base ? `; domain=.${base}` : '';
-		const secure = location.protocol === 'https:' ? '; Secure' : '';
-		document.cookie = `${STORAGE_KEY}=${mode}; path=/${domain}; max-age=${COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
+		writeSharedCookie(STORAGE_KEY, mode, COOKIE_MAX_AGE);
 	} catch {
 		/* A visitor who cannot persist the choice still gets it for this page. */
 	}
