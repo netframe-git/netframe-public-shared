@@ -24,12 +24,20 @@ export interface FooterLink {
 	href: string;
 	/** Open in a new tab. */
 	external?: boolean;
+	/** Render as unavailable without making it interactive. */
+	disabled?: boolean;
 }
 
-export interface FooterColumn {
+export interface FooterSection {
 	heading: string;
 	links: FooterLink[];
 }
+
+/**
+ * One visual footer column. Most contain one section; the final public-site
+ * column stacks Company and Portals so the six-column grid does not wrap.
+ */
+export type FooterColumn = FooterSection | { sections: FooterSection[] };
 
 export interface SocialLinks {
 	linkedin?: string;
@@ -49,6 +57,8 @@ export interface NavEntry {
 	href: string;
 	description?: string;
 	badge?: string;
+	external?: boolean;
+	disabled?: boolean;
 }
 
 export interface NavSection {
@@ -62,6 +72,14 @@ export interface NavItem {
 	label: string;
 	/** A plain link. Mutually exclusive with `children`. */
 	href?: string;
+	external?: boolean;
 	/** A mega-menu dropdown. */
 	children?: NavSection[];
+}
+
+export type HeaderUtilityIcon = 'download' | 'licensing' | 'support' | 'community';
+
+/** Optional shortcuts shown in the primary site's mega-menu footer and drawer. */
+export interface HeaderUtilityLink extends FooterLink {
+	icon?: HeaderUtilityIcon;
 }

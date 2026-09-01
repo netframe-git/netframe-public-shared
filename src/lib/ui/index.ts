@@ -12,10 +12,13 @@ export { default as CookieConsent } from './CookieConsent.svelte';
 export type {
 	SessionUser,
 	FooterLink,
+	FooterSection,
 	FooterColumn,
 	SocialLinks,
 	RegionSwitcher,
 	NavEntry,
 	NavSection,
-	NavItem
+	NavItem,
+	HeaderUtilityIcon,
+	HeaderUtilityLink
 } from './types.js';

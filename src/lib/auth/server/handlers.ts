@@ -110,10 +110,14 @@ export function handleAuthCallback(opts: { failureRedirect?: string } = {}): Req
 	};
 }
 
-export function handleAuthLogout(opts: { signedOutDestination: string }): RequestHandler {
-	const dest = opts.signedOutDestination;
-
+export function handleAuthLogout(opts: {
+	signedOutDestination: string | ((event: RequestEvent) => string);
+}): RequestHandler {
 	return async (event: RequestEvent) => {
+		const dest =
+			typeof opts.signedOutDestination === 'function'
+				? opts.signedOutDestination(event)
+				: opts.signedOutDestination;
 		const idToken = event.cookies.get(IT_COOKIE);
 		clearSession(event);
 

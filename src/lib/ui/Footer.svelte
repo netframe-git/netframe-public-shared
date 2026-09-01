@@ -1,6 +1,12 @@
 <script lang="ts">
 	import Logo from './Logo.svelte';
-	import type { FooterColumn, FooterLink, RegionSwitcher, SocialLinks } from './types.js';
+	import type {
+		FooterColumn,
+		FooterLink,
+		FooterSection,
+		RegionSwitcher,
+		SocialLinks
+	} from './types.js';
 
 	/**
 	 * The Netframe footer.
@@ -25,6 +31,8 @@
 		/** Public site only: opens the consent manager. */
 		onCookieSettings?: (() => void) | null;
 		logoHref?: string;
+		/** Rewrites internal links, for example to retain the public-site region. */
+		resolveHref?: (href: string) => string;
 	}
 
 	let {
@@ -36,8 +44,13 @@
 		copyright = null,
 		regions = null,
 		onCookieSettings = null,
-		logoHref = 'https://netframe.com'
+		logoHref = 'https://netframe.com',
+		resolveHref = (href: string) => href
 	}: Props = $props();
+
+	function sectionsFor(column: FooterColumn): FooterSection[] {
+		return 'sections' in column ? column.sections : [column];
+	}
 
 	const year = new Date().getFullYear();
 	const copyrightLine = $derived(
@@ -91,23 +104,31 @@
 					{/if}
 				</div>
 
-				{#each columns as col}
+				{#each columns as column}
 					<div>
-						<h4 class="mb-4 text-xs font-semibold tracking-wider text-nf-subtle uppercase">
-							{col.heading}
-						</h4>
-						<ul class="space-y-2.5">
-							{#each col.links as link}
-								<li>
-									<a
-										href={link.href}
-										target={link.external ? '_blank' : undefined}
-										rel={link.external ? 'noopener noreferrer' : undefined}
-										class="text-sm text-nf-muted transition-colors hover:text-nf-text">{link.label}</a
-									>
-								</li>
-							{/each}
-						</ul>
+						{#each sectionsFor(column) as section, sectionIndex}
+							<div class={sectionIndex ? 'mt-6' : ''}>
+								<h4 class="mb-4 text-xs font-semibold tracking-wider text-nf-subtle uppercase">
+									{section.heading}
+								</h4>
+								<ul class="space-y-2.5">
+									{#each section.links as link}
+										<li>
+											{#if link.disabled}
+												<span class="cursor-not-allowed text-sm text-nf-subtle opacity-50" aria-disabled="true">{link.label}</span>
+											{:else}
+												<a
+													href={link.external ? link.href : resolveHref(link.href)}
+													target={link.external ? '_blank' : undefined}
+													rel={link.external ? 'noopener noreferrer' : undefined}
+													class="text-sm text-nf-muted transition-colors hover:text-nf-text">{link.label}</a
+												>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							</div>
+						{/each}
 					</div>
 				{/each}
 			</div>
@@ -133,7 +154,7 @@
 					{/if}
 
 					{#each legal as link}
-						<a href={link.href} class="hover:text-nf-text">{link.label}</a>
+						<a href={link.external ? link.href : resolveHref(link.href)} class="hover:text-nf-text">{link.label}</a>
 					{/each}
 
 					{#if onCookieSettings}

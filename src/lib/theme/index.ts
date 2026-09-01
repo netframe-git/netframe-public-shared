@@ -66,6 +66,12 @@ function createThemeStore() {
 	const { subscribe, set: rawSet } = writable<ThemeMode>(initial);
 
 	if (isBrowser()) {
+		// Migrate a same-origin localStorage choice (and any legacy host-only
+		// cookie) into the parent-domain cookie as soon as an app loads. This is
+		// what makes an existing choice follow the visitor to every other app.
+		persist(initial);
+		applyMode(initial);
+
 		window
 			.matchMedia('(prefers-color-scheme: dark)')
 			.addEventListener('change', () => {

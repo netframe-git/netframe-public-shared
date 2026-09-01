@@ -13,6 +13,7 @@
 		compact?: boolean;
 		/** Light-on-dark palette, for dark surfaces like a hero. */
 		onDark?: boolean;
+		onclick?: () => void;
 		class?: string;
 	}
 
@@ -20,6 +21,7 @@
 		href = 'https://netframe.com',
 		compact = false,
 		onDark = false,
+		onclick,
 		class: extraClass = ''
 	}: Props = $props();
 
@@ -29,6 +31,7 @@
 
 <a
 	{href}
+	{onclick}
 	class="flex shrink-0 items-center gap-3 transition-opacity duration-200 hover:opacity-85 {extraClass}"
 >
 	<img src="/assets/img/logo.png" alt="Netframe" loading="lazy" class="h-9 w-9" />
