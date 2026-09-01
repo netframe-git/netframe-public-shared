@@ -175,7 +175,7 @@
 				{/if}
 
 				<div class="relative" data-account-menu>
-					<button type="button" onclick={() => { accountOpen = !accountOpen; openMenu = null; }} class="flex items-center gap-1 rounded px-1.5 py-1.5 text-nf-muted-strong transition-colors hover:bg-nf-surface-alt hover:text-nf-text" aria-haspopup="menu" aria-expanded={accountOpen} aria-label={isAuth ? `Account menu for ${displayName}` : 'Account & settings'}>
+					<button type="button" onclick={() => { accountOpen = !accountOpen; openMenu = null; }} class="flex cursor-pointer items-center gap-1 rounded px-1.5 py-1.5 text-nf-muted-strong transition-colors hover:bg-nf-surface-alt hover:text-nf-text" aria-haspopup="menu" aria-expanded={accountOpen} aria-label={isAuth ? `Account menu for ${displayName}` : 'Account & settings'}>
 						{#if isAuth}<span class="flex h-6 w-6 items-center justify-center rounded border border-nf-brand-soft-border bg-nf-brand-soft-bg text-xs font-bold text-nf-brand-text">{displayName?.[0] ?? 'U'}</span>{:else}<User size={14} />{/if}
 						<ChevronDown size={11} class="transition-transform duration-150 {accountOpen ? 'rotate-180' : ''}" />
 					</button>
@@ -193,7 +193,7 @@
 								<div class="mb-1.5 text-[10px] font-semibold tracking-wider text-nf-subtle uppercase">Theme</div>
 								<div class="grid grid-cols-3 gap-1">
 									{#each THEMES as [mode, Icon, label]}
-										<button type="button" onclick={() => theme.set(mode)} class="flex flex-col items-center gap-1 rounded border py-1.5 text-[10px] font-medium transition-colors {$theme === mode ? 'border-nf-brand-soft-border bg-nf-brand-soft-bg text-nf-brand-text' : 'border-nf-border bg-transparent text-nf-muted-strong hover:bg-nf-surface-alt'}" aria-pressed={$theme === mode}>
+										<button type="button" onclick={() => theme.set(mode)} class="flex cursor-pointer flex-col items-center gap-1 rounded border py-1.5 text-[10px] font-medium transition-colors {$theme === mode ? 'border-nf-brand-soft-border bg-nf-brand-soft-bg text-nf-brand-text' : 'border-nf-border bg-transparent text-nf-muted-strong hover:bg-nf-surface-alt'}" aria-pressed={$theme === mode}>
 											<Icon size={12} />{label}
 										</button>
 									{/each}
@@ -202,9 +202,9 @@
 
 							<div class="py-1">
 								{#if isAuth && onSignOut}
-									<button type="button" onclick={() => { onSignOut?.(); accountOpen = false; }} class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-nf-muted-strong hover:bg-nf-surface-alt hover:text-nf-text" role="menuitem"><LogOut size={13} /> Sign out</button>
+									<button type="button" onclick={() => { onSignOut?.(); accountOpen = false; }} class="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-nf-muted-strong hover:bg-nf-surface-alt hover:text-nf-text" role="menuitem"><LogOut size={13} /> Sign out</button>
 								{:else if !isAuth && onSignIn}
-									<button type="button" onclick={() => { onSignIn?.(); accountOpen = false; }} class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-nf-muted-strong hover:bg-nf-surface-alt hover:text-nf-text" role="menuitem"><User size={13} /> Sign in</button>
+									<button type="button" onclick={() => { onSignIn?.(); accountOpen = false; }} class="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-nf-muted-strong hover:bg-nf-surface-alt hover:text-nf-text" role="menuitem"><User size={13} /> Sign in</button>
 								{/if}
 							</div>
 						</div>
