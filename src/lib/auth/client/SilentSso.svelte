@@ -12,10 +12,10 @@
 	 * already been set by the callback, and all that remains is to re-run the
 	 * load functions so the header shows the signed-in state.
 	 *
-	 * Runs on every full page load with no session and no backoff, so signing in
-	 * on one app is noticed by the next immediately rather than after a
-	 * cooldown. It does not run on client-side navigation, since the component
-	 * mounts once per document.
+	 * Runs immediately on every full page load with no session. It also checks
+	 * again when an anonymous tab becomes active, so a login completed in
+	 * another Netframe app (or while this page was in the back/forward cache) is
+	 * noticed without requiring a manual reload.
 	 *
 	 * Everything here is written around one constraint: an unreachable, slow or
 	 * broken Keycloak must be indistinguishable from a signed-out visitor.
@@ -36,9 +36,7 @@
 		return document.cookie.split('; ').some((c) => c.startsWith(`${SSO_PAUSE_COOKIE}=`));
 	}
 
-	function startProbe(): () => void {
-		if (justSignedOut()) return () => {};
-
+	function startProbe(onSettled: () => void): () => void {
 		let settled = false;
 		let frame: HTMLIFrameElement | null = null;
 		let timeout = 0;
@@ -57,6 +55,7 @@
 			window.removeEventListener('message', onMessage);
 			frame?.remove();
 			frame = null;
+			onSettled();
 			if (result === 'authenticated') {
 				try {
 					onAuthenticated();
@@ -66,49 +65,62 @@
 			}
 		};
 
-		const run = () => {
-			window.addEventListener('message', onMessage);
-			frame = document.createElement('iframe');
-			frame.src = '/auth/silent';
-			frame.title = 'Sign-in check';
-			frame.setAttribute('aria-hidden', 'true');
-			frame.setAttribute('tabindex', '-1');
-			frame.style.cssText =
-				'position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none;';
+		window.addEventListener('message', onMessage);
+		frame = document.createElement('iframe');
+		frame.src = '/auth/silent';
+		frame.title = 'Sign-in check';
+		frame.setAttribute('aria-hidden', 'true');
+		frame.setAttribute('tabindex', '-1');
+		frame.style.cssText =
+			'position:absolute;width:0;height:0;border:0;visibility:hidden;pointer-events:none;';
 
-			// The iframe never reports back if Keycloak is unreachable, so this
-			// timeout is the only thing that ends the probe during an outage.
-			timeout = window.setTimeout(() => finish('error'), timeoutMs);
-			document.body.appendChild(frame);
-		};
+		// The iframe never reports back if the identity service is unreachable,
+		// so this timeout is the only thing that ends the probe during an outage.
+		timeout = window.setTimeout(() => finish('error'), timeoutMs);
+		document.body.appendChild(frame);
 
-		// Deferred to idle time: this is a convenience, not part of rendering,
-		// and must never compete with the page for bandwidth or main thread.
-		// Called as a method, not detached: an unbound requestIdleCallback
-		// throws "Illegal invocation" in Chromium.
-		if (typeof window.requestIdleCallback === 'function') {
-			const handle = window.requestIdleCallback(run, { timeout: 3000 });
-			return () => {
-				window.cancelIdleCallback?.(handle);
-				finish(null);
-			};
-		}
-		const handle = window.setTimeout(run, 800);
-		return () => {
-			window.clearTimeout(handle);
-			finish(null);
-		};
+		return () => finish(null);
 	}
 
 	onMount(() => {
 		let stop = () => {};
-		try {
-			stop = startProbe();
-		} catch (err) {
-			// Nothing this component does is important enough to break a page over.
-			console.log('[sso] silent check could not start', err);
-		}
+		let probing = false;
+		let lastStartedAt = 0;
+
+		const probe = () => {
+			// visibilitychange and focus commonly arrive together. This small guard
+			// folds them into one identity request without delaying a genuine check.
+			const now = Date.now();
+			if (
+				probing ||
+				document.visibilityState === 'hidden' ||
+				justSignedOut() ||
+				now - lastStartedAt < 1500
+			) {
+				return;
+			}
+
+			lastStartedAt = now;
+			probing = true;
+			try {
+				stop = startProbe(() => {
+					probing = false;
+				});
+			} catch (err) {
+				probing = false;
+				// Nothing this component does is important enough to break a page over.
+				console.log('[sso] silent check could not start', err);
+			}
+		};
+
+		const onActive = () => probe();
+		probe();
+		window.addEventListener('focus', onActive);
+		document.addEventListener('visibilitychange', onActive);
+
 		return () => {
+			window.removeEventListener('focus', onActive);
+			document.removeEventListener('visibilitychange', onActive);
 			try {
 				stop();
 			} catch {
