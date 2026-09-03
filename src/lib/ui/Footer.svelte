@@ -87,12 +87,12 @@
 						<div class="flex items-center gap-3">
 							{#if social.linkedin}
 								<a href={social.linkedin} target="_blank" rel="noopener noreferrer" aria-label="Neon Dynamics on LinkedIn" class="text-nf-subtle transition-colors hover:text-nf-text">
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05a4.2 4.2 0 0 1 3.75-2c4 0 4.75 2.6 4.75 6V21h-4v-5.6c0-1.35-.03-3.08-1.9-3.08-1.9 0-2.2 1.47-2.2 3v5.68H9z"/></svg>
+									<svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05a4.2 4.2 0 0 1 3.75-2c4 0 4.75 2.6 4.75 6V21h-4v-5.6c0-1.35-.03-3.08-1.9-3.08-1.9 0-2.2 1.47-2.2 3v5.68H9z"/></svg>
 								</a>
 							{/if}
 							{#if social.reddit}
 								<a href={social.reddit} target="_blank" rel="noopener noreferrer" aria-label="Netframe on Reddit" class="text-nf-subtle transition-colors hover:text-nf-text">
-									<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5.5 9.2a1.4 1.4 0 0 1-.7 1.2c0 .13.02.26.02.4 0 2.2-2.6 4-5.8 4s-5.8-1.8-5.8-4c0-.14 0-.27.02-.4a1.4 1.4 0 1 1 1.6-2.28A7.1 7.1 0 0 1 11 8.6l.7-3.3 2.3.5a1 1 0 1 1 .1.9l-1.6-.34-.6 2.85a7.1 7.1 0 0 1 4.1 1.5 1.4 1.4 0 0 1 1.5.5zM9 13.4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-.6 2.1a.4.4 0 0 1 .02.6A4.6 4.6 0 0 1 12 17a4.6 4.6 0 0 1-2.4-.9.4.4 0 1 1 .5-.6c.5.4 1.2.7 1.9.7s1.4-.3 1.9-.7a.4.4 0 0 1 .5 0z"/></svg>
+									<svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5.5 9.2a1.4 1.4 0 0 1-.7 1.2c0 .13.02.26.02.4 0 2.2-2.6 4-5.8 4s-5.8-1.8-5.8-4c0-.14 0-.27.02-.4a1.4 1.4 0 1 1 1.6-2.28A7.1 7.1 0 0 1 11 8.6l.7-3.3 2.3.5a1 1 0 1 1 .1.9l-1.6-.34-.6 2.85a7.1 7.1 0 0 1 4.1 1.5 1.4 1.4 0 0 1 1.5.5zM9 13.4a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-.6 2.1a.4.4 0 0 1 .02.6A4.6 4.6 0 0 1 12 17a4.6 4.6 0 0 1-2.4-.9.4.4 0 1 1 .5-.6c.5.4 1.2.7 1.9.7s1.4-.3 1.9-.7a.4.4 0 0 1 .5 0z"/></svg>
 								</a>
 							{/if}
 							{#if social.x}
