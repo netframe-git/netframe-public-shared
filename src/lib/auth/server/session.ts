@@ -132,7 +132,9 @@ function toUser(claims: AccessTokenClaims): SessionUser {
 		sub: claims.sub,
 		username: claims.preferred_username ?? claims.email ?? claims.sub,
 		email: claims.email ?? null,
-		name: claims.name ?? claims.given_name ?? null
+		name: claims.name ?? claims.given_name ?? null,
+		firstName: claims.given_name ?? null,
+		lastName: claims.family_name ?? null
 	};
 }
 

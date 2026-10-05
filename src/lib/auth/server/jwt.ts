@@ -25,6 +25,7 @@ export interface AccessTokenClaims {
 	email?: string;
 	name?: string;
 	given_name?: string;
+	family_name?: string;
 	realm_access?: { roles?: string[] };
 	[key: string]: unknown;
 }

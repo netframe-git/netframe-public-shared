@@ -17,6 +17,9 @@ export interface SessionUser {
 	 */
 	email: string | null;
 	name: string | null;
+	/** Verified profile name claims, when provided by the identity provider. */
+	firstName: string | null;
+	lastName: string | null;
 }
 
 export interface FooterLink {
