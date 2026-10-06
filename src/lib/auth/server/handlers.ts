@@ -3,10 +3,15 @@ import {
 	authorizeUrl,
 	exchangeCode,
 	endSessionUrl,
+	getAuthEnv,
 	getOidcConfig,
 	pkceChallenge,
 	randomUrlSafe
 } from './oidc.js';
+import { validateClaims, verifyJwtRS256 } from './jwt.js';
+import { jwksUri } from './oidc.js';
+import type { AccessTokenClaims } from './jwt.js';
+import type { TokenSet } from './oidc.js';
 import {
 	clearSession,
 	pauseSilentSso,
@@ -39,6 +44,68 @@ function sanitizeReturnTo(returnTo: string | null): string {
 	if (returnTo.startsWith('//')) return '/';
 	if (!returnTo.startsWith('/')) return '/';
 	return returnTo;
+}
+
+/**
+ * Keep the Mautic request off the login response path. It is deliberately
+ * best-effort: an unavailable contact API must never interrupt SSO.
+ */
+function syncMauticContact(event: RequestEvent, tokens: TokenSet): Promise<void> {
+	const apiKey = getAuthEnv(event, 'EMAIL_KEY');
+	if (!apiKey) return Promise.resolve();
+
+	return (async () => {
+		const cfg = getOidcConfig(event);
+		const claims: AccessTokenClaims = await verifyJwtRS256(
+			tokens.access_token,
+			await jwksUri(cfg)
+		);
+		validateClaims(claims, { issuer: cfg.issuer, clientId: cfg.clientId });
+
+		const email = claims.email?.trim().toLowerCase();
+		if (!email || claims.email_verified !== true) {
+			console.warn('[auth.callback] Mautic contact sync skipped: email is missing or unverified');
+			return;
+		}
+
+		const response = await fetch('https://m.neondynamics.com.au/api/contacts/new', {
+			method: 'POST',
+			headers: {
+				Authorization: `Basic ${btoa(`portal-api:${apiKey}`)}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				email,
+				...(claims.given_name ? { firstname: claims.given_name } : {}),
+				...(claims.family_name ? { lastname: claims.family_name } : {}),
+				tags: ['sso-account']
+			}),
+			signal: AbortSignal.timeout(3000)
+		});
+
+		if (!response.ok) {
+			console.warn('[auth.callback] Mautic contact sync returned an error', {
+				status: response.status
+			});
+		}
+	})().catch((error: unknown) => {
+		console.warn('[auth.callback] Mautic contact sync failed', {
+			error: error instanceof Error ? error.name : 'unknown'
+		});
+	});
+}
+
+function scheduleMauticContactSync(event: RequestEvent, tokens: TokenSet): void {
+	const task = syncMauticContact(event, tokens);
+	const platform = event.platform as
+		| {
+				context?: { waitUntil?: (promise: Promise<unknown>) => void };
+				ctx?: { waitUntil?: (promise: Promise<unknown>) => void };
+		  }
+		| undefined;
+	const executionContext = platform?.context ?? platform?.ctx;
+	if (executionContext?.waitUntil) executionContext.waitUntil(task);
+	else void task;
 }
 
 export function handleAuthStart(): RequestHandler {
@@ -94,6 +161,7 @@ export function handleAuthCallback(opts: { failureRedirect?: string } = {}): Req
 				codeVerifier: verifier
 			});
 			storeTokens(event, tokens);
+			scheduleMauticContactSync(event, tokens);
 		} catch (err) {
 			/**
 			 * The session being replaced is void once the exchange fails, so it

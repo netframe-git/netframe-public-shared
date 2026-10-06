@@ -54,10 +54,15 @@ export function configureAuth(opts: { envFallback?: Record<string, string | unde
 	envFallback = opts.envFallback;
 }
 
-export function getOidcConfig(event: RequestEvent): OidcConfig {
+/** Read a server-only app binding, with the same local-development fallback. */
+export function getAuthEnv(event: RequestEvent, name: string): string | undefined {
 	const platformEnv = (event.platform as { env?: Record<string, string | undefined> } | undefined)
 		?.env;
-	const get = (k: string) => platformEnv?.[k] ?? envFallback?.[k];
+	return platformEnv?.[name] ?? envFallback?.[name];
+}
+
+export function getOidcConfig(event: RequestEvent): OidcConfig {
+	const get = (k: string) => getAuthEnv(event, k);
 
 	const issuer = get('KEYCLOAK_ISSUER');
 	const clientId = get('KEYCLOAK_CLIENT_ID');
