@@ -78,7 +78,7 @@ function syncMauticContact(event: RequestEvent, tokens: TokenSet): Promise<void>
 				email,
 				...(claims.given_name ? { firstname: claims.given_name } : {}),
 				...(claims.family_name ? { lastname: claims.family_name } : {}),
-				tags: ['sso-account']
+				tags: ['sso-account', 'sso-website-origin']
 			}),
 			signal: AbortSignal.timeout(3000)
 		});
